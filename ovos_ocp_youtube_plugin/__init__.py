@@ -4,14 +4,13 @@ import json
 import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
 from ovos_utils.log import LOG
-from tutubo.models import Channel
 from pytube import YouTube
+from tutubo.models import Channel
 
 
 class YoutubeBackend(str, enum.Enum):
     YDL = "youtube-dl"
     PYTUBE = "pytube"
-    PAFY = "pafy"
     INVIDIOUS = "invidious"
     WEBVIEW = "webview"
 
@@ -27,10 +26,13 @@ class YoutubeLiveBackend(str, enum.Enum):
     REDIRECT = "redirect"  # url = f"https://www.youtube.com/c/{channel_name}/live"
     YDL = "youtube-dl"  # same as above, but always uses YoutubeBackend.YDL internally
     PYTUBE = "pytube"
-    YT_SEARCHER = "youtube_searcher"
 
 
 class OCPYoutubeExtractor(OCPStreamExtractor):
+    ydl = OCPYDLExtractor()
+    live = OCPYoutubeChannelLiveExtractor()
+    pytube = OCPPytubeExtractor()
+    invidious = OCPInvidiousExtractor()
 
     @property
     def supported_seis(self):
@@ -50,131 +52,85 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
     def extract_stream(self, uri, video=True):
         """ return the real uri that can be played by OCP """
-        meta = {}
 
         if uri.startswith("youtube.channel.live//"):
-            uri = uri.replace("youtube.channel.live//", "")
-            uri = self.get_youtube_live_from_channel(uri)["url"]
-            if not uri:
-                LOG.error("youtube channel live stream extraction failed!!!")
-            else:
-                uri = "youtube//" + uri
+            return self.live.extract_stream(uri, video)
 
+        if self.settings.get("youtube_backend") == YoutubeBackend.WEBVIEW or \
+                self.settings.get("youtube_backend") == YoutubeBackend.INVIDIOUS or \
+                uri.startswith("invidious//"):
+            return self.invidious.extract_stream(uri, video)
+        elif self.settings.get("youtube_backend") == YoutubeBackend.YDL or \
+                uri.startswith("ydl//"):
+            return self.ydl.extract_stream(uri, video)
+        elif self.settings.get("youtube_backend") == YoutubeBackend.PYTUBE or \
+                uri.startswith("pytube//"):
+            return self.pytube.extract_stream(uri, video)
+
+    # helpers
+    @staticmethod
+    def parse_title(title):
+        # this is a very hacky imple,mentation that kinda works
+        # TODO - lang support should be added and this refactored
+
+        # try to extract_streams artist from title
+        delims = [":", "|", "-"]
+        removes = ["(Official Video)", "(Official Music Video)",
+                   "(Lyrics)", "(Official)", "(Album Stream)",
+                   "(Legendado)"]
+        removes += [s.replace("(", "").replace(")", "") for s in removes] + \
+                   [s.replace("[", "").replace("]", "") for s in removes]
+        removes += [s.upper() for s in removes] + [s.lower() for s in removes]
+        removes += ["(HQ)", "()", "[]", "- HQ -"]
+        for d in delims:
+            if d in title:
+                for k in removes:
+                    title = title.replace(k, "")
+                artist = title.split(d)[0]
+                title = "".join(title.split(d)[1:])
+                title = title.strip() or "..."
+                artist = artist.strip() or "..."
+                return title, artist
+        return title.replace(" - Topic", ""), ""
+
+    @staticmethod
+    def is_youtube(url):
+        # TODO localization
+        if not url:
+            return False
+        return "youtube.com/" in url or "youtu.be/" in url
+
+
+class OCPYDLExtractor(OCPYoutubeExtractor):
+
+    @property
+    def supported_seis(self):
+        """
+        skills may return results requesting a specific extractor to be used
+
+        plugins should report a StreamExtractorIds (sei) that identifies it can handle certain kinds of requests
+
+        any streams of the format "{sei}//{uri}" can be handled by this plugin
+        """
+        return ["ydl"]
+
+    def extract_stream(self, uri, video=True):
+        """ return the real uri that can be played by OCP """
         if uri.startswith("ydl//"):
-            # supports more than youtube!!!
             uri = uri.replace("ydl//", "")
-            meta = self.get_ydl_stream(uri)
-            if not meta:
-                LOG.error("ydl stream extraction failed!!!")
-
-        elif uri.startswith("youtube//") or is_youtube(uri):
-            uri = uri.replace("youtube//", "")
-            if self.settings.youtube_backend == YoutubeBackend.WEBVIEW:
-                meta["playback"] = PlaybackType.WEBVIEW
-
-            if not meta or meta.get("playback") != PlaybackType.WEBVIEW:
-                LOG.error("youtube stream extraction failed!!!")
-                LOG.warning("Forcing webview playback")
-                meta["playback"] = PlaybackType.WEBVIEW
-
-            if meta.get("playback") != PlaybackType.WEBVIEW:
-                meta = self.get_youtube_stream(uri, audio_only=not video)
-            else:
-                vid_id = uri.split("v=")[-1].split("&")[0]
-                uri = f"https://{self._settings.invidious_host}/watch?v={vid_id}"
-            meta["uri"] = uri
-
+        meta = self.get_ydl_stream(uri, audio_only=not video)
+        if not meta:
+            LOG.error("ydl stream extraction failed!!!")
         return meta
 
-    def get_youtube_stream(self, url,
-                           audio_only=False,
-                           ocp_settings=None):
-        settings = ocp_settings or self.ocp_settings
-        backend = settings.get("youtube_backend") or \
-                  YoutubeBackend.INVIDIOUS
-        if backend == YoutubeBackend.PYTUBE:
-            extractor = self.get_pytube_stream
-        elif backend == YoutubeBackend.PAFY:
-            extractor = self.get_pafy_stream
-        elif backend == YoutubeBackend.INVIDIOUS:
-            extractor = self.get_invidious_stream
-        else:
-            extractor = self.get_ydl_stream
-        return extractor(url, audio_only=audio_only,
-                         ocp_settings=settings)
-
-    # extractors
-    def get_invidious_stream(self, url, audio_only=False, ocp_settings=None):
-        # proxy via invidious instance
-        # public instances: https://docs.invidious.io/Invidious-Instances.md
-        # self host: https://github.com/iv-org/invidious
-
-        settings = ocp_settings or self.ocp_settings
-        host = settings.get("invidious_host")
-        local = "true" if settings.get("proxy_invidious", True) else "false"
-
-        if url.endswith("/live"):
-            # TODO invidious backend can not handle lives, what do?
-            return self.get_youtube_live_from_channel_redirect(url, ocp_settings=ocp_settings)
-
-        vid_id = url.split("watch?v=")[-1].split("&")[0]
-
-        if not host:
-            # hosted by a OpenVoiceOS member
-            hosts = ["https://video.strongthany.cc"]
-            try:
-                api_url = "https://api.invidious.io/instances.json?pretty=1&sort_by=type,health"
-                hosts += ["http://" + h[0] for h in requests.get(api_url).json()]
-            except:
-                pass
-        else:
-            hosts = [host]
-
-        data = {}
-
-        for host in hosts:
-            LOG.debug(f"Trying invidious host: {host}")
-            api = f"{host}/api/v1/videos/{vid_id}"
-            try:
-                r = requests.get(api, timeout=3)
-                # TODO seems like apparently valid json fails to parse sometimes?
-                data = json.loads(r.text)
-            except Exception as e:
-                LOG.error(f"request failed for: {api}  - ({e})")
-            if data and "error" not in data:
-                break
-
-        if not data or "error" in data:
-            return {}
-
-        if audio_only:
-            pass  # TODO
-
-        if data.get("liveNow"):
-            # TODO invidious backend can not handle lives, what do?
-            return self.get_ydl_stream(f"https://www.youtube.com/watch?v={vid_id}",
-                                       ocp_settings=ocp_settings)
-        else:
-            stream = f"{host}/latest_version?id={vid_id}&itag=22&local={local}&subtitles=en"
-
-        return {
-            "uri": stream,
-            "title": data.get("title"),
-            "image": host + data['videoThumbnails'][0]["url"],
-            "length": data['lengthSeconds']
-        }
-
-    def get_ydl_stream(self, url, audio_only=False, ocp_settings=None,
-                       ydl_opts=None, best=True):
-        settings = ocp_settings or self.ocp_settings
+    def get_ydl_stream(self, url, audio_only=False, ydl_opts=None, best=True):
         ydl_opts = ydl_opts or {
             "quiet": True,
             "hls_prefer_native": True,
             "verbose": False,
             "format": "best"
         }
-
-        backend = settings.get("ydl_backend") or YdlBackend.AUTO
+        backend = self.ocp_settings.get("ydl_backend") or YdlBackend.AUTO
         if backend == YdlBackend.AUTO:
             try:
                 import yt_dlp as youtube_dl
@@ -206,173 +162,13 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
             info["uri"] = self._select_ydl_format(meta, audio_only=audio_only,
                                                   best=best)
-            title, artist = self._parse_title(info["title"])
+            title, artist = self.parse_title(info["title"])
             info["title"] = title
             info["artist"] = artist or info.get("artist")
             info["is_live"] = meta.get("is_live", False)
         return info
 
-    def get_youtube_live_from_channel(self, url, ocp_settings=None):
-        settings = ocp_settings or self.ocp_settings
-        backend = settings.get("youtube_live_backend") or \
-                  YoutubeLiveBackend.REDIRECT
-        if backend == YoutubeLiveBackend.YT_SEARCHER:
-            extractor = self.get_youtubesearcher_channel_livestreams
-        elif backend == YoutubeLiveBackend.PYTUBE:
-            extractor = self.get_pytube_channel_livestreams
-        elif backend == YoutubeLiveBackend.YDL:
-            ocp_settings = dict(ocp_settings)
-            ocp_settings["youtube_backend"] = YoutubeBackend.YDL
-            extractor = self.get_youtube_live_from_channel_redirect
-        else:
-            extractor = self.get_youtube_live_from_channel_redirect
-        return extractor(url, ocp_settings=settings)
-
-    def get_pafy_stream(self, url, audio_only=False, ocp_settings=None):
-        import pafy
-        settings = ocp_settings or {}
-        stream = pafy.new(url)
-        meta = {
-            "url": url,
-            # "audio_stream": stream.getbestaudio().url,
-            # "stream": stream.getbest().url,
-            "author": stream.author,
-            "image": stream.getbestthumb().split("?")[0],
-            #        "description": stream.description,
-            "length": stream.length * 1000,
-            "category": stream.category,
-            #        "upload_date": stream.published,
-            #        "tags": stream.keywords
-        }
-
-        # TODO fastest vs best
-        stream = None
-        if audio_only:
-            stream = stream.getbestaudio() or stream.getbest()
-        else:
-            stream = stream.getbest()
-        if not stream:
-            raise RuntimeError("Failed to extract stream")
-        uri = stream.url
-        meta["uri"] = uri
-        title, artist = self._parse_title(stream.title)
-        meta["title"] = title
-        meta["artist"] = artist or stream.author
-        return meta
-
-    def get_pytube_stream(self, url, audio_only=False, ocp_settings=None, best=True):
-        settings = ocp_settings or {}
-        yt = YouTube(url)
-        s = None
-        if audio_only:
-            s = yt.streams.filter(only_audio=True).order_by('abr')
-        if not s:
-            s = yt.streams.filter(progressive=True).order_by('resolution')
-
-        if best:  # best quality
-            s = s.last()
-        else:  # fastest
-            s = s.first()
-
-        info = {
-            "uri": s.url,
-            "url": yt.watch_url,
-            "title": yt.title,
-            "author": yt.author,
-            "image": yt.thumbnail_url,
-            "length": yt.length * 1000
-        }
-        title, artist = self._parse_title(info["title"])
-        info["title"] = title
-        info["artist"] = artist or info.get("author")
-        return info
-
-    def get_pytube_channel_livestreams(self, url, ocp_settings=None):
-        yt = Channel(url)
-        for v in yt.videos_generator():
-            if v.vid_info.get('playabilityStatus', {}).get('liveStreamability'):
-                title, artist = self._parse_title(v.title)
-                yield {
-                    "url": v.watch_url,
-                    "title": title,
-                    "artist": artist,
-                    "is_live": True,
-                    "image": v.thumbnail_url,
-                    "length": v.length * 1000
-                }
-
-    def get_youtubesearcher_channel_livestreams(self, url, ocp_settings=None):
-        LOG.warning("youtube_searcher is abandonware, support will be removed in the next release")
-        try:
-            from youtube_searcher import extract_videos
-            for e in extract_videos(url):
-                if not e["is_live"]:
-                    continue
-                title, artist = self._parse_title(e["title"])
-                yield {
-                    "url": "https://www.youtube.com/watch?v=" + e["videoId"],
-                    "is_live": True,
-                    "description": e["description"],
-                    "image": e["thumbnail"],
-                    "title": title,
-                    "artist": artist
-                }
-        except:
-            pass
-
-    def get_youtube_live_from_channel_redirect(self, url, ocp_settings=None):
-        # TODO improve channel name handling
-        url = url.split("?")[0]
-        if "/c/" in url or "/channel/" in url or "/user/" in url:
-            channel_name = url.split("/channel/")[-1].split("/c/")[-1].split("/user/")[-1].split("/")[0]
-        else:
-            channel_name = url.split("/")[-1]
-
-        # we see different patterns randomly used in the wild
-        # i do not know a easy way to check which are valid for a channel
-        # lazily try: except: and hail mary
-        try:
-            # seems to work for all channels
-            url = f"https://www.youtube.com/{channel_name}/live"
-            return self.get_youtube_stream(url, ocp_settings=ocp_settings)
-        except:
-            # works for some channels only
-            url = f"https://www.youtube.com/c/{channel_name}/live"
-            return self.get_youtube_stream(url, ocp_settings=ocp_settings)
-
     # helpers
-    @staticmethod
-    def is_youtube(url):
-        # TODO localization
-        if not url:
-            return False
-        return "youtube.com/" in url or "youtu.be/" in url
-
-    @staticmethod
-    def _parse_title(title):
-        # this is a very hacky imple,mentation that kinda works
-        # TODO - lang support should be added and this refactored
-
-        # try to extract_streams artist from title
-        delims = [":", "|", "-"]
-        removes = ["(Official Video)", "(Official Music Video)",
-                   "(Lyrics)", "(Official)", "(Album Stream)",
-                   "(Legendado)"]
-        removes += [s.replace("(", "").replace(")", "") for s in removes] + \
-                   [s.replace("[", "").replace("]", "") for s in removes]
-        removes += [s.upper() for s in removes] + [s.lower() for s in removes]
-        removes += ["(HQ)", "()", "[]", "- HQ -"]
-        for d in delims:
-            if d in title:
-                for k in removes:
-                    title = title.replace(k, "")
-                artist = title.split(d)[0]
-                title = "".join(title.split(d)[1:])
-                title = title.strip() or "..."
-                artist = artist.strip() or "..."
-                return title, artist
-        return title.replace(" - Topic", ""), ""
-
     @staticmethod
     def _select_ydl_format(meta, audio_only=False, preferred_ext=None, best=True):
         if not meta.get("formats"):
@@ -397,3 +193,187 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
         if best:
             return fmts[-1]["url"]
         return fmts[0]["url"]
+
+
+class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
+
+    @property
+    def supported_seis(self):
+        """
+        skills may return results requesting a specific extractor to be used
+
+        plugins should report a StreamExtractorIds (sei) that identifies it can handle certain kinds of requests
+
+        any streams of the format "{sei}//{uri}" can be handled by this plugin
+        """
+        return ["youtube.channel.live"]
+
+    def extract_stream(self, uri, video=True):
+        """ return the real uri that can be played by OCP """
+        uri = uri.replace("youtube.channel.live//", "")
+        if self.settings.get("youtube_live_backend") == YoutubeLiveBackend.PYTUBE:
+            return self.get_pytube_channel_livestreams(uri)
+        else:
+            return self.get_youtube_live_from_redirect(uri)
+
+    @staticmethod
+    def get_pytube_channel_livestreams(url):
+        yt = Channel(url)
+        for v in yt.videos_generator():
+            if v.vid_info.get('playabilityStatus', {}).get('liveStreamability'):
+                title, artist = OCPYoutubeExtractor.parse_title(v.title)
+                yield {
+                    "url": v.watch_url,
+                    "title": title,
+                    "artist": artist,
+                    "is_live": True,
+                    "image": v.thumbnail_url,
+                    "length": v.length * 1000
+                }
+
+    @staticmethod
+    def get_youtube_live_from_redirect(url):
+        # TODO improve channel name handling
+        url = url.split("?")[0]
+        if "/c/" in url or "/channel/" in url or "/user/" in url:
+            channel_name = url.split("/channel/")[-1].split("/c/")[-1].split("/user/")[-1].split("/")[0]
+        else:
+            channel_name = url.split("/")[-1]
+
+        # we see different patterns randomly used in the wild
+        # i do not know a easy way to check which are valid for a channel
+        # lazily try: except: and hail mary
+        try:
+            # seems to work for all channels
+            url = f"https://www.youtube.com/{channel_name}/live"
+            return super().extract_stream(url)
+        except:
+            # works for some channels only
+            url = f"https://www.youtube.com/c/{channel_name}/live"
+            return super().extract_stream(url)
+
+
+class OCPInvidiousExtractor(OCPYoutubeExtractor):
+
+    @property
+    def supported_seis(self):
+        """
+        skills may return results requesting a specific extractor to be used
+
+        plugins should report a StreamExtractorIds (sei) that identifies it can handle certain kinds of requests
+
+        any streams of the format "{sei}//{uri}" can be handled by this plugin
+        """
+        return ["invidious"]
+
+    def extract_stream(self, url, video=True):
+        """ return the real uri that can be played by OCP """
+
+        if url.startswith("invidious//"):
+            url = url.replace("invidious//", "")
+
+        local = "true" if self.ocp_settings.get("proxy_invidious", True) else "false"
+
+        vid_id = url.split("watch?v=")[-1].split("&")[0]
+
+        data = {}
+
+        for host in self.get_invidious_hosts():
+            LOG.debug(f"Trying invidious host: {host}")
+            api = f"{host}/api/v1/videos/{vid_id}"
+            try:
+                r = requests.get(api, timeout=3)
+                # TODO seems like apparently valid json fails to parse sometimes?
+                data = json.loads(r.text)
+            except Exception as e:
+                LOG.error(f"request failed for: {api}  - ({e})")
+            if data and "error" not in data:
+                if data.get("liveNow"):
+                    # TODO invidious backend can not handle lives, what do?
+                    stream = f"https://www.youtube.com/watch?v={vid_id}"
+                    return {
+                        "uri": stream,
+                        "title": data.get("title"),
+                        "image": host + data['videoThumbnails'][0]["url"],
+                        "playback": PlaybackType.WEBVIEW
+                    }
+                elif self.settings.get("youtube_backend") == YoutubeBackend.WEBVIEW:
+                    stream = f"{host}/watch?v={vid_id}"
+                else:
+                    stream = f"{host}/latest_version?id={vid_id}&itag=22&local={local}&subtitles=en"
+
+                if not video:
+                    pass  # TODO
+
+                return {
+                    "uri": stream,
+                    "title": data.get("title"),
+                    "image": host + data['videoThumbnails'][0]["url"],
+                    "length": data['lengthSeconds']
+                }
+
+        return {}
+
+    def get_invidious_hosts(self):
+        # proxy via invidious instance
+        # public instances: https://docs.invidious.io/Invidious-Instances.md
+        # self host: https://github.com/iv-org/invidious
+        host = self.ocp_settings.get("invidious_host")
+        if not host:
+            # hosted by a OpenVoiceOS member
+            hosts = ["https://video.strongthany.cc"]
+            try:
+                api_url = "https://api.invidious.io/instances.json?pretty=1&sort_by=type,health"
+                hosts += ["http://" + h[0] for h in requests.get(api_url).json()]
+            except:
+                pass
+        else:
+            hosts = [host]
+        return hosts
+
+
+class OCPPytubeExtractor(OCPYoutubeExtractor):
+
+    @property
+    def supported_seis(self):
+        """
+        skills may return results requesting a specific extractor to be used
+
+        plugins should report a StreamExtractorIds (sei) that identifies it can handle certain kinds of requests
+
+        any streams of the format "{sei}//{uri}" can be handled by this plugin
+        """
+        return ["pytube"]
+
+    def extract_stream(self, uri, video=True):
+        """ return the real uri that can be played by OCP """
+        if uri.startswith("pytube//"):
+            uri = uri.replace("pytube//", "")
+        return self.get_pytube_stream(uri, audio_only=not video)
+
+    @staticmethod
+    def get_pytube_stream(url, audio_only=False, best=True):
+        yt = YouTube(url)
+        s = None
+        if audio_only:
+            s = yt.streams.filter(only_audio=True).order_by('abr')
+        if not s:
+            s = yt.streams.filter(progressive=True).order_by('resolution')
+
+        if best:  # best quality
+            s = s.last()
+        else:  # fastest
+            s = s.first()
+
+        info = {
+            "uri": s.url,
+            "url": yt.watch_url,
+            "title": yt.title,
+            "author": yt.author,
+            "image": yt.thumbnail_url,
+            "length": yt.length * 1000
+        }
+        title, artist = OCPYoutubeExtractor.parse_title(info["title"])
+        info["title"] = title
+        info["artist"] = artist or info.get("author")
+        return info
