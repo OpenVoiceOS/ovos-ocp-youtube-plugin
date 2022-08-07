@@ -63,12 +63,12 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
                 self.settings.get("youtube_backend") == YoutubeBackend.INVIDIOUS or \
                 uri.startswith("invidious//"):
             return self.invidious.extract_stream(uri, video)
-        elif self.settings.get("youtube_backend") == YoutubeBackend.YDL or \
-                uri.startswith("ydl//"):
-            return self.ydl.extract_stream(uri, video)
         elif self.settings.get("youtube_backend") == YoutubeBackend.PYTUBE or \
                 uri.startswith("pytube//"):
             return self.pytube.extract_stream(uri, video)
+        else:
+            # youtube-dl by default
+            return self.ydl.extract_stream(uri, video)
 
     # helpers
     @staticmethod
