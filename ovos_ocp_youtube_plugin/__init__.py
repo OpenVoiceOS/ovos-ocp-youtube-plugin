@@ -37,6 +37,11 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
     def __init__(self, ocp_settings=None):
         super().__init__(ocp_settings)
         self.settings = self.ocp_settings.get("youtube", {})
+        # migrate old style OCP fields into youtube settings
+        for k in ["youtube_backend", "youtube_live_backend",
+                  "invidious_host", "ydl_backend", "proxy_invidious"]:
+            if k not in self.settings:
+                self.settings[k] = self.ocp_settings.get(k)
 
     @property
     def supported_seis(self):
@@ -137,7 +142,7 @@ class OCPYDLExtractor(OCPYoutubeExtractor):
             "verbose": False,
             "format": "best"
         }
-        backend = self.ocp_settings.get("ydl_backend") or YdlBackend.AUTO
+        backend = self.settings.get("ydl_backend") or YdlBackend.AUTO
         if backend == YdlBackend.AUTO:
             try:
                 import yt_dlp as youtube_dl
@@ -279,7 +284,7 @@ class OCPInvidiousExtractor(OCPYoutubeExtractor):
         if url.startswith("invidious//"):
             url = url.replace("invidious//", "")
 
-        local = "true" if self.ocp_settings.get("proxy_invidious", True) else "false"
+        local = "true" if self.settings.get("proxy_invidious", True) else "false"
 
         vid_id = url.split("watch?v=")[-1].split("&")[0]
 
@@ -325,7 +330,7 @@ class OCPInvidiousExtractor(OCPYoutubeExtractor):
         # proxy via invidious instance
         # public instances: https://docs.invidious.io/Invidious-Instances.md
         # self host: https://github.com/iv-org/invidious
-        host = self.ocp_settings.get("invidious_host")
+        host = self.settings.get("invidious_host")
         if not host:
             # hosted by a OpenVoiceOS member
             hosts = ["https://video.strongthany.cc"]
