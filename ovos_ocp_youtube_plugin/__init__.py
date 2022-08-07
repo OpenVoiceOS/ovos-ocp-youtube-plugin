@@ -34,6 +34,10 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
     pytube = OCPPytubeExtractor()
     invidious = OCPInvidiousExtractor()
 
+    def __init__(self, ocp_settings=None):
+        super().__init__(ocp_settings)
+        self.settings = self.ocp_settings.get("youtube", {})
+
     @property
     def supported_seis(self):
         """
