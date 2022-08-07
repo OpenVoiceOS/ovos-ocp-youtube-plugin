@@ -4,6 +4,8 @@ import json
 import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
 from ovos_utils.log import LOG
+from tutubo.models import Channel
+from pytube import YouTube
 
 
 class YoutubeBackend(str, enum.Enum):
@@ -70,12 +72,12 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
             if self.settings.youtube_backend == YoutubeBackend.WEBVIEW:
                 meta["playback"] = PlaybackType.WEBVIEW
 
-            if not meta and self.playback != PlaybackType.WEBVIEW:
+            if not meta or meta.get("playback") != PlaybackType.WEBVIEW:
                 LOG.error("youtube stream extraction failed!!!")
                 LOG.warning("Forcing webview playback")
                 meta["playback"] = PlaybackType.WEBVIEW
 
-            if meta["playback"] != PlaybackType.WEBVIEW:
+            if meta.get("playback") != PlaybackType.WEBVIEW:
                 meta = self.get_youtube_stream(uri, audio_only=not video)
             else:
                 vid_id = uri.split("v=")[-1].split("&")[0]
@@ -83,6 +85,23 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
             meta["uri"] = uri
 
         return meta
+
+    def get_youtube_stream(self, url,
+                           audio_only=False,
+                           ocp_settings=None):
+        settings = ocp_settings or self.ocp_settings
+        backend = settings.get("youtube_backend") or \
+                  YoutubeBackend.INVIDIOUS
+        if backend == YoutubeBackend.PYTUBE:
+            extractor = self.get_pytube_stream
+        elif backend == YoutubeBackend.PAFY:
+            extractor = self.get_pafy_stream
+        elif backend == YoutubeBackend.INVIDIOUS:
+            extractor = self.get_invidious_stream
+        else:
+            extractor = self.get_ydl_stream
+        return extractor(url, audio_only=audio_only,
+                         ocp_settings=settings)
 
     # extractors
     def get_invidious_stream(self, url, audio_only=False, ocp_settings=None):
@@ -209,23 +228,6 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
             extractor = self.get_youtube_live_from_channel_redirect
         return extractor(url, ocp_settings=settings)
 
-    def get_youtube_stream(self, url,
-                           audio_only=False,
-                           ocp_settings=None):
-        settings = ocp_settings or self.ocp_settings
-        backend = settings.get("youtube_backend") or \
-                  YoutubeBackend.INVIDIOUS
-        if backend == YoutubeBackend.PYTUBE:
-            extractor = self.get_pytube_stream
-        elif backend == YoutubeBackend.PAFY:
-            extractor = self.get_pafy_stream
-        elif backend == YoutubeBackend.INVIDIOUS:
-            extractor = self.get_invidious_stream
-        else:
-            extractor = self.get_ydl_stream
-        return extractor(url, audio_only=audio_only,
-                         ocp_settings=settings)
-
     def get_pafy_stream(self, url, audio_only=False, ocp_settings=None):
         import pafy
         settings = ocp_settings or {}
@@ -259,7 +261,6 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
         return meta
 
     def get_pytube_stream(self, url, audio_only=False, ocp_settings=None, best=True):
-        from pytube import YouTube
         settings = ocp_settings or {}
         yt = YouTube(url)
         s = None
@@ -287,7 +288,6 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
         return info
 
     def get_pytube_channel_livestreams(self, url, ocp_settings=None):
-        from pytube import Channel
         yt = Channel(url)
         for v in yt.videos_generator():
             if v.vid_info.get('playabilityStatus', {}).get('liveStreamability'):
