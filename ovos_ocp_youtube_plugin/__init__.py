@@ -29,10 +29,17 @@ class YoutubeLiveBackend(str, enum.Enum):
 
 
 class OCPYoutubeExtractor(OCPStreamExtractor):
-    ydl = OCPYDLExtractor()
-    live = OCPYoutubeChannelLiveExtractor()
-    pytube = OCPPytubeExtractor()
-    invidious = OCPInvidiousExtractor()
+    ydl = None
+    live = None
+    pytube = None
+    invidious = None
+
+    @classmethod
+    def init_extractors(cls):
+        cls.ydl = OCPYDLExtractor()
+        cls.live = OCPYoutubeChannelLiveExtractor()
+        cls.pytube = OCPPytubeExtractor()
+        cls.invidious = OCPInvidiousExtractor()
 
     def __init__(self, ocp_settings=None):
         super().__init__(ocp_settings)
@@ -307,7 +314,7 @@ class OCPInvidiousExtractor(OCPYoutubeExtractor):
                         "uri": stream,
                         "title": data.get("title"),
                         "image": host + data['videoThumbnails'][0]["url"],
-                        "playback": PlaybackType.WEBVIEW
+                        "playback": 5  # PlaybackType.WEBVIEW
                     }
                 elif self.settings.get("youtube_backend") == YoutubeBackend.WEBVIEW:
                     stream = f"{host}/watch?v={vid_id}"
@@ -389,3 +396,6 @@ class OCPPytubeExtractor(OCPYoutubeExtractor):
         info["title"] = title
         info["artist"] = artist or info.get("author")
         return info
+
+
+OCPYoutubeExtractor.init_extractors()
