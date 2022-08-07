@@ -4,11 +4,22 @@ from setuptools import setup
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
+### replace this data with your plugin specific info
+PLUGIN_TYPE = "ovos.ocp.extractor"
+PLUGIN_NAME = 'ovos-ocp-youtube-plugin'
+PLUGIN_PKG = PLUGIN_NAME.replace("-", "_")
+PLUGIN_CLAZZ = "OCPYoutubeExtractor"
+PLUGIN_CONFIGS = f"{PLUGIN_CLAZZ}Config"
+###
+
+PLUGIN_ENTRY_POINT = f'{PLUGIN_NAME} = {PLUGIN_PKG}:{PLUGIN_CLAZZ}'
+CONFIG_ENTRY_POINT = f'{PLUGIN_NAME}.config = {PLUGIN_PKG}:{PLUGIN_CONFIGS}'
+
 
 def get_version():
     """ Find the version of the package"""
     version = None
-    version_file = os.path.join(BASEDIR, 'ovos-ocp-youtube-plugin', 'version.py')
+    version_file = os.path.join(BASEDIR, PLUGIN_PKG, 'version.py')
     major, minor, build, alpha = (None, None, None, None)
     with open(version_file) as f:
         for line in f:
@@ -49,24 +60,20 @@ def required(requirements_file):
                 if pkg.strip() and not pkg.startswith("#")]
 
 
-PLUGIN_ENTRY_POINT = 'ovos.ocp.extractor=ovos_ocp_youtube_plugin:OCPYoutubeExtractor'
-PLUGIN_CONFIG_ENTRY_POINT = 'ovos.ocp.extractor.config=ovos_ocp_youtube_plugin.config:OCPYoutubeExtractorConfig'
-
-
 setup(
-    name='ovos-ocp-youtube-plugin',
+    name=PLUGIN_NAME,
     version=get_version(),
     description='OCP youtube stream extractor plugin',
-    url='https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin',
+    url=f'https://github.com/OpenVoiceOS/{PLUGIN_NAME}',
     author='JarbasAi',
     author_email='jarbasai@mailfence.com',
     license='Apache-2.0',
-    packages=['ovos_ocp_youtube_plugin'],
+    packages=[PLUGIN_PKG],
     install_requires=required("requirements.txt"),
-    package_data={'': package_files('ovos_ocp_youtube_plugin')},
+    package_data={'': package_files(PLUGIN_PKG)},
     zip_safe=True,
     include_package_data=True,
     keywords='ovos ocp plugin',
-    entry_points={'ovos.ocp.extractor': PLUGIN_ENTRY_POINT,
-                  'ovos.ocp.extractor.config': PLUGIN_CONFIG_ENTRY_POINT}
+    entry_points={PLUGIN_TYPE: PLUGIN_ENTRY_POINT,
+                  f'{PLUGIN_TYPE}.config': CONFIG_ENTRY_POINT}
 )
