@@ -43,7 +43,8 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
         any streams of the format "{sei}//{uri}" can be handled by this plugin
         """
-        return ["youtube", "ydl", "youtube.channel.live"]
+        return ["youtube", "ydl", "youtube.channel.live",
+                "pytube", "invidious"]
 
     def validate_uri(self, uri):
         """ return True if uri can be handled by this extractor, False otherwise"""
@@ -52,6 +53,8 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
     def extract_stream(self, uri, video=True):
         """ return the real uri that can be played by OCP """
+        if uri.startswith("youtube//"):
+            uri = uri.replace("youtube//", "")
 
         if uri.startswith("youtube.channel.live//"):
             return self.live.extract_stream(uri, video)
