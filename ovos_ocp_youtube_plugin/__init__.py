@@ -3,6 +3,7 @@ import json
 
 import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
+from ovos_plugin_manager.utils import classproperty
 from ovos_utils.log import LOG
 from pytube import YouTube
 from tutubo.models import Channel
@@ -50,7 +51,7 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
             if k not in self.settings:
                 self.settings[k] = self.ocp_settings.get(k)
 
-    @property
+    @classproperty
     def supported_seis(self):
         """
         skills may return results requesting a specific extractor to be used
@@ -122,7 +123,7 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
 class OCPYDLExtractor(OCPYoutubeExtractor):
 
-    @property
+    @classproperty
     def supported_seis(self):
         """
         skills may return results requesting a specific extractor to be used
@@ -216,7 +217,7 @@ class OCPYDLExtractor(OCPYoutubeExtractor):
 
 class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
 
-    @property
+    @classproperty
     def supported_seis(self):
         """
         skills may return results requesting a specific extractor to be used
@@ -274,7 +275,7 @@ class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
 
 class OCPInvidiousExtractor(OCPYoutubeExtractor):
 
-    @property
+    @classproperty
     def supported_seis(self):
         """
         skills may return results requesting a specific extractor to be used
@@ -353,7 +354,7 @@ class OCPInvidiousExtractor(OCPYoutubeExtractor):
 
 class OCPPytubeExtractor(OCPYoutubeExtractor):
 
-    @property
+    @classproperty
     def supported_seis(self):
         """
         skills may return results requesting a specific extractor to be used
