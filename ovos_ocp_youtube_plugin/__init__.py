@@ -30,11 +30,20 @@ class YoutubeLiveBackend(str, enum.Enum):
 
 class OCPYoutubeExtractor(OCPStreamExtractor):
 
+    @property
+    def supported_seis(self):
+        """
+        skills may return results requesting a specific extractor to be used
+
+        plugins should report a StreamExtractorIds (sei) that identifies it can handle certain kinds of requests
+
+        any streams of the format "{sei}//{uri}" can be handled by this plugin
+        """
+        return ["youtube", "ydl", "youtube.channel.live"]
+
     def validate_uri(self, uri):
         """ return True if uri can be handled by this extractor, False otherwise"""
-        return uri.startswith("youtube//") or \
-               uri.startswith("ydl//") or \
-               uri.startswith("youtube.channel.live//") or \
+        return any([uri.startswith(sei) for sei in self.supported_seis]) or \
                self.is_youtube(uri)
 
     def extract_stream(self, uri, video=True):
