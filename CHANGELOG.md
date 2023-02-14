@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/HEAD)
+## [V0.0.1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/V0.0.1) (2023-01-26)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/908909a377c3f57b65a4440e915ea53f10b6190a...HEAD)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/908909a377c3f57b65a4440e915ea53f10b6190a...V0.0.1)
 
 **Merged pull requests:**
 
