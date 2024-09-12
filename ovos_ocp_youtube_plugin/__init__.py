@@ -140,7 +140,7 @@ class OCPYDLExtractor(OCPYoutubeExtractor):
     def extract_stream(self, uri, video=None):
         """ return the real uri that can be played by OCP """
         if video is None:
-            video = not OCPYoutubeExtractor.is_ytmus(u)
+            video = not OCPYoutubeExtractor.is_ytmus(uri)
         if uri.startswith("ydl//"):
             uri = uri.replace("ydl//", "")
         meta = self.get_ydl_stream(uri, audio_only=not video)
