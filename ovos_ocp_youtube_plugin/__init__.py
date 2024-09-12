@@ -4,8 +4,8 @@ import json
 import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
 from ovos_utils.log import LOG
-from pytube import YouTube
 from tutubo.models import Channel
+from tutubo.pytube import YouTube
 
 
 class YoutubeBackend(str, enum.Enum):
@@ -41,6 +41,10 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
         cls.pytube = OCPPytubeExtractor()
         cls.invidious = OCPInvidiousExtractor()
 
+    @staticmethod
+    def is_ytmus(uri):
+        return "music.youtube" in uri
+
     def __init__(self, ocp_settings=None):
         super().__init__(ocp_settings)
         self.settings = self.ocp_settings.get("youtube", {})
@@ -65,7 +69,7 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
     def validate_uri(self, uri):
         """ return True if uri can be handled by this extractor, False otherwise"""
         return any([uri.startswith(sei) for sei in self.supported_seis]) or \
-               self.is_youtube(uri)
+            self.is_youtube(uri)
 
     def extract_stream(self, uri, video=True):
         """ return the real uri that can be played by OCP """
@@ -133,8 +137,10 @@ class OCPYDLExtractor(OCPYoutubeExtractor):
         """
         return ["ydl"]
 
-    def extract_stream(self, uri, video=True):
+    def extract_stream(self, uri, video=None):
         """ return the real uri that can be played by OCP """
+        if video is None:
+            video = not OCPYoutubeExtractor.is_ytmus(uri)
         if uri.startswith("ydl//"):
             uri = uri.replace("ydl//", "")
         meta = self.get_ydl_stream(uri, audio_only=not video)
@@ -237,9 +243,9 @@ class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
 
     @staticmethod
     def get_pytube_channel_livestreams(url):
-        yt = Channel(url)
-        for v in yt.videos_generator():
-            if v.vid_info.get('playabilityStatus', {}).get('liveStreamability'):
+        c = Channel(url)
+        for v in c.live:
+            if v.is_live:
                 title, artist = OCPYoutubeExtractor.parse_title(v.title)
                 yield {
                     "url": v.watch_url,
