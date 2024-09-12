@@ -1,24 +1,12 @@
 # Changelog
 
-## [0.0.2a3](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.2a3) (2024-09-11)
+## [0.0.3a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.3a1) (2024-09-12)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/V0.0.2a2...0.0.2a3)
-
-**Merged pull requests:**
-
-- feat:semver [\#4](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/4) ([JarbasAl](https://github.com/JarbasAl))
-
-## [V0.0.2a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/V0.0.2a2) (2024-01-12)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/V0.0.2a1...V0.0.2a2)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.2...0.0.3a1)
 
 **Merged pull requests:**
 
-- fix/dependencies [\#2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/2) ([NeonJarbas](https://github.com/NeonJarbas))
-
-## [V0.0.2a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/V0.0.2a1) (2023-02-14)
-
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/V0.0.1...V0.0.2a1)
+- fix:live\_extract [\#6](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/6) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
