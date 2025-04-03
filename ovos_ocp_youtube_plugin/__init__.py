@@ -238,8 +238,9 @@ class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
         uri = uri.replace("youtube.channel.live//", "")
         if uri.endswith("/live"): # no parsing needed in theory
             try:
-                return super().extract_stream(url)
-            except:
+                return super().extract_stream(uri)
+            except Exception as e:
+                LOG.debug(f"Failed to extract stream directly from live URL: {e}")
                 pass  # let the extractors below give it a try
         # need to figure out the correct final livestream
         if self.settings.get("youtube_live_backend") == YoutubeLiveBackend.PYTUBE:
