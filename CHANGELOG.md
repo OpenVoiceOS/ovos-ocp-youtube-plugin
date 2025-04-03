@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.0.3a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.3a1) (2024-09-12)
+## [0.0.4a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.4a1) (2025-04-03)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.2...0.0.3a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.3...0.0.4a1)
 
 **Merged pull requests:**
 
-- fix:live\_extract [\#6](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/6) ([JarbasAl](https://github.com/JarbasAl))
+- fix:livestreams [\#8](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/8) ([JarbasAl](https://github.com/JarbasAl))
 
 
 
