@@ -1,6 +1,7 @@
 import enum
 import json
 
+from ovos_utils import classproperty
 import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
 from ovos_utils.log import LOG
@@ -54,8 +55,8 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
             if k not in self.settings:
                 self.settings[k] = self.ocp_settings.get(k)
 
-    @property
-    def supported_seis(self):
+    @classproperty
+    def supported_seis(cls):
         """
         skills may return results requesting a specific extractor to be used
 
@@ -126,8 +127,8 @@ class OCPYoutubeExtractor(OCPStreamExtractor):
 
 class OCPYDLExtractor(OCPYoutubeExtractor):
 
-    @property
-    def supported_seis(self):
+    @classproperty
+    def supported_seis(cls):
         """
         skills may return results requesting a specific extractor to be used
 
@@ -222,8 +223,8 @@ class OCPYDLExtractor(OCPYoutubeExtractor):
 
 class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
 
-    @property
-    def supported_seis(self):
+    @classproperty
+    def supported_seis(cls):
         """
         skills may return results requesting a specific extractor to be used
 
@@ -287,8 +288,8 @@ class OCPYoutubeChannelLiveExtractor(OCPYoutubeExtractor):
 
 class OCPInvidiousExtractor(OCPYoutubeExtractor):
 
-    @property
-    def supported_seis(self):
+    @classproperty
+    def supported_seis(cls):
         """
         skills may return results requesting a specific extractor to be used
 
@@ -366,8 +367,8 @@ class OCPInvidiousExtractor(OCPYoutubeExtractor):
 
 class OCPPytubeExtractor(OCPYoutubeExtractor):
 
-    @property
-    def supported_seis(self):
+    @classproperty
+    def supported_seis(cls):
         """
         skills may return results requesting a specific extractor to be used
 
