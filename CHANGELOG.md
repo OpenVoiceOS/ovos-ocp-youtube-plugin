@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.0.6a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.6a1) (2025-11-05)
+## [0.0.7a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a1) (2025-12-18)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.5...0.0.6a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.6...0.0.7a1)
 
 **Merged pull requests:**
 
-- Update requirements.txt [\#12](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/12) ([JarbasAl](https://github.com/JarbasAl))
+- chore: Configure Renovate [\#14](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/14) ([renovate[bot]](https://github.com/apps/renovate))
 
 
 
