@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.7a3](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a3) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a2...0.0.7a3)
+
+**Merged pull requests:**
+
+- chore\(deps\): update actions/checkout action to v6 [\#20](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/20) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [0.0.7a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a2) (2025-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a1...0.0.7a2)
