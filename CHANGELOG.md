@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.7a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a2) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a1...0.0.7a2)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency python to 3.14 [\#15](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/15) ([renovate[bot]](https://github.com/apps/renovate))
+
 ## [0.0.7a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a1) (2025-12-18)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.6...0.0.7a1)
