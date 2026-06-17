@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ovos_ocp_youtube_plugin"
+dynamic = ["version"]
+description = "OCP youtube stream extractor plugin"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "JarbasAi", email = "jarbasai@mailfence.com"}
+]
+keywords = ["ovos", "ocp", "plugin"]
+dependencies = [
+    "ovos-plugin-manager>=2.1.0,<3.0.0",
+    "tutubo>=2.0.2,<3.0.0",
+    "yt-dlp"
+]
+
+[project.urls]
+Homepage = "https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin"
+
+[project.entry-points."opm.ocp.extractor"]
+"ovos-ocp-youtube-plugin" = "ovos_ocp_youtube_plugin:OCPYoutubeExtractor"
+
+[tool.setuptools.dynamic]
+version = {attr = "ovos_ocp_youtube_plugin.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ovos_ocp_youtube_plugin*"]
+
+[tool.setuptools.package-data]
+ovos_ocp_youtube_plugin = [
+    "*.json",
+]
