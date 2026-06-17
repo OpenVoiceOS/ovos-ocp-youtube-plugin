@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.7a4](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a4) (2026-06-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a3...0.0.7a4)
+
+**Merged pull requests:**
+
+- chore: add missing shared CI workflows [\#24](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/24) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.7a3](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a3) (2025-12-19)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a2...0.0.7a3)
