@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.8a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a4...0.0.8a1)
+
+**Merged pull requests:**
+
+- fix: standardize entry-point group to opm.ocp.extractor + add tests [\#26](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/26) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.7a4](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a4) (2026-06-17)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a3...0.0.7a4)
