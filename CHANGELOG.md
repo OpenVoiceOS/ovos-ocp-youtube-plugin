@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.8a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a2) (2026-07-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.8a1...0.0.8a2)
+
+**Merged pull requests:**
+
+- docs: rewrite README in Simplified Technical English [\#28](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/28) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.8a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a1) (2026-06-25)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a4...0.0.8a1)
