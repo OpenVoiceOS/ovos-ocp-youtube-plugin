@@ -6,7 +6,16 @@ import requests
 from ovos_plugin_manager.templates.ocp import OCPStreamExtractor
 from ovos_utils.log import LOG
 from tutubo.models import Channel
-from tutubo.pytube import YouTube
+try:
+    # tutubo>=3.0.0 rewrote the internals around a new innertube-based API
+    # and dropped the `tutubo.pytube` submodule entirely. Import it lazily
+    # so simply having a newer tutubo installed does not break every
+    # extractor in this plugin (ydl, invidious, live-channel), only the
+    # explicitly opt-in "pytube" backend, which raises a clear error below
+    # if it is actually used without a compatible tutubo version.
+    from tutubo.pytube import YouTube
+except ImportError:
+    YouTube = None
 
 
 class YoutubeBackend(str, enum.Enum):
@@ -386,6 +395,12 @@ class OCPPytubeExtractor(OCPYoutubeExtractor):
 
     @staticmethod
     def get_pytube_stream(url, audio_only=False, best=True):
+        if YouTube is None:
+            raise RuntimeError(
+                "the 'pytube' backend requires tutubo<3.0.0 "
+                "(tutubo.pytube was removed in tutubo>=3.0.0); "
+                "use the default 'youtube-dl' backend instead"
+            )
         yt = YouTube(url)
         s = None
         if audio_only:
