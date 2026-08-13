@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.9a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.9a1) (2026-08-13)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.8a2...0.0.9a1)
+
+**Merged pull requests:**
+
+- fix: lazy tutubo.pytube import so tutubo\>=3 doesn't break the whole plugin [\#30](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/30) ([JarbasAl](https://github.com/JarbasAl))
+
 ## [0.0.8a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a2) (2026-07-31)
 
 [Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.8a1...0.0.8a2)
