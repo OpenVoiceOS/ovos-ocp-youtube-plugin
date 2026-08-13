@@ -1,12 +1,60 @@
 # Changelog
 
-## [0.0.6a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.6a1) (2025-11-05)
+## [0.0.9a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.9a1) (2026-08-13)
 
-[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.5...0.0.6a1)
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.8a2...0.0.9a1)
 
 **Merged pull requests:**
 
-- Update requirements.txt [\#12](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/12) ([JarbasAl](https://github.com/JarbasAl))
+- fix: lazy tutubo.pytube import so tutubo\>=3 doesn't break the whole plugin [\#30](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/30) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.0.8a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a2) (2026-07-31)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.8a1...0.0.8a2)
+
+**Merged pull requests:**
+
+- docs: rewrite README in Simplified Technical English [\#28](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/28) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.0.8a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.8a1) (2026-06-25)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a4...0.0.8a1)
+
+**Merged pull requests:**
+
+- fix: standardize entry-point group to opm.ocp.extractor + add tests [\#26](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/26) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.0.7a4](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a4) (2026-06-17)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a3...0.0.7a4)
+
+**Merged pull requests:**
+
+- chore: add missing shared CI workflows [\#24](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/24) ([JarbasAl](https://github.com/JarbasAl))
+
+## [0.0.7a3](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a3) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a2...0.0.7a3)
+
+**Merged pull requests:**
+
+- chore\(deps\): update actions/checkout action to v6 [\#20](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/20) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [0.0.7a2](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a2) (2025-12-19)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.7a1...0.0.7a2)
+
+**Merged pull requests:**
+
+- chore\(deps\): update dependency python to 3.14 [\#15](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/15) ([renovate[bot]](https://github.com/apps/renovate))
+
+## [0.0.7a1](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/tree/0.0.7a1) (2025-12-18)
+
+[Full Changelog](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/compare/0.0.6...0.0.7a1)
+
+**Merged pull requests:**
+
+- chore: Configure Renovate [\#14](https://github.com/OpenVoiceOS/ovos-ocp-youtube-plugin/pull/14) ([renovate[bot]](https://github.com/apps/renovate))
 
 
 
